@@ -16,7 +16,7 @@ struct RootView: View {
                 .tabItem {
                     Label(LocalizedStringKey("Orders"), systemImage: "list.bullet")
                 }
-            CustomersView()
+            CustomersView(customersSubject: viewModel.customersSubject)
                 .tabItem {
                     Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
                 }

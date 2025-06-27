@@ -11,3 +11,12 @@ struct Customer: Decodable, Identifiable {
     var latitude: Double
     var longitude: Double
 }
+
+extension Customer: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+        hasher.combine(latitude)
+        hasher.combine(longitude)
+    }
+}

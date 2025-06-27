@@ -14,9 +14,22 @@
 		9D2966552E0EB1EB006CF5AA /* Lup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9D8B82D52E0EC30200428FB1 /* Exceptions for "Lup" folder in "Lup" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9D2966542E0EB1EB006CF5AA /* Lup */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9D2966572E0EB1EB006CF5AA /* Lup */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9D8B82D52E0EC30200428FB1 /* Exceptions for "Lup" folder in "Lup" target */,
+			);
 			path = Lup;
 			sourceTree = "<group>";
 		};

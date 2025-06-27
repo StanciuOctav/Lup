@@ -1,26 +1,36 @@
 //
-//  ContentViewModel.swift
+//  RootViewModel.swift
 //  Lup
 //
 //  Created by Octav Stanciu on 27.06.2025.
 //
 
+import Combine
 import SwiftUI
 
-final class ContentViewModel: ObservableObject {
+final class RootViewModel: ObservableObject {
     @Published var customers: [Customer] = []
     @Published var orders: [Order] = []
+    
+    var customersSubject: PassthroughSubject<[Customer], Never> = .init()
+    var ordersSubject: PassthroughSubject<[Order], Never> = .init()
+    
     private let customerManager = CustomerNetworkManager()
     private let orderManager = OrderNetworkManager()
     
-    func fetchCustomers() async {
+    func fetchData() async {
+        await fetchCustomers()
+        await fetchOrders()
+    }
+    
+    private func fetchCustomers() async {
         await customerManager.fetchData { [weak self] results in
             guard let self else { return }
-
+            
             switch results {
             case .success(let customers):
                 Task { @MainActor in
-                    self.customers = customers
+                    self.customersSubject.send(customers)
                 }
             case .failure(let failure):
                 print("Failed to fetch data: \(failure)")
@@ -28,14 +38,14 @@ final class ContentViewModel: ObservableObject {
         }
     }
     
-    func fetchOrders() async {
+    private func fetchOrders() async {
         await orderManager.fetchData { [weak self] results in
             guard let self else { return }
-
+            
             switch results {
             case .success(let orders):
                 Task { @MainActor in
-                    self.orders = orders
+                    self.ordersSubject.send(orders)
                 }
             case .failure(let failure):
                 print("Failed to fetch data: \(failure)")

@@ -32,7 +32,7 @@ final class CustomerNetworkManager: NetworkServiceProtocol {
             .sink(receiveCompletion: { status in
                 switch status {
                 case .finished:
-                    print("Completed")
+                    print("Customers completed fetching")
                     break
                 case .failure(let error):
                     print("Receiver error \(error)")

@@ -1,16 +1,21 @@
 //
-//  ContentView.swift
+//  OrdersView.swift
 //  Lup
 //
 //  Created by Octav Stanciu on 27.06.2025.
 //
 
+import Combine
 import Constants
 import SwiftUI
 
-struct ContentView: View {
+struct OrdersView: View {
     
-    @StateObject private var viewModel = ContentViewModel()
+    @StateObject private var viewModel: OrdersViewModel
+    
+    init(ordersSubject: PassthroughSubject<[Order], Never>) {
+        self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject))
+    }
     
     var body: some View {
         NavigationStack {
@@ -18,9 +23,6 @@ struct ContentView: View {
                 orderCardView(for: order)
             }
             .navigationTitle("Orders")
-        }
-        .task {
-            await viewModel.fetchOrders()
         }
     }
     
@@ -55,8 +57,4 @@ struct ContentView: View {
         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .padding()
     }
-}
-
-#Preview {
-    ContentView()
 }

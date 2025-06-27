@@ -1,0 +1,28 @@
+//
+//  RootView.swift
+//  Lup
+//
+//  Created by Octav Stanciu on 27.06.2025.
+//
+
+import SwiftUI
+
+struct RootView: View {
+    @StateObject private var viewModel = RootViewModel()
+    
+    var body: some View {
+        TabView {
+            OrdersView(ordersSubject: viewModel.ordersSubject)
+                .tabItem {
+                    Label(LocalizedStringKey("Orders"), systemImage: "list.bullet")
+                }
+            CustomersView()
+                .tabItem {
+                    Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
+                }
+        }
+        .task {
+            await viewModel.fetchData()
+        }
+    }
+}

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum OrderStatus: String, Decodable {
+enum OrderStatus: String, CaseIterable, Decodable {
     case new, pending, delivered
     
     var statusColor: Color {
@@ -28,7 +28,6 @@ struct Order: Decodable, Identifiable {
     var price: Int
     var customerId: Int
     var imageUrl: String
-    var iimageUrl: URL? { URL(string: imageUrl) }
     var status: OrderStatus
 }
 
@@ -40,5 +39,15 @@ extension Order: Hashable {
         hasher.combine(customerId)
         hasher.combine(imageUrl)
         hasher.combine(status)
+    }
+}
+
+extension Order: Equatable {
+    static func == (lhs: Order, rhs: Order) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.description == rhs.description &&
+        lhs.price == rhs.price &&
+        lhs.customerId == rhs.customerId &&
+        lhs.imageUrl == rhs.imageUrl
     }
 }

@@ -12,49 +12,31 @@ import SwiftUI
 struct OrdersView: View {
     
     @StateObject private var viewModel: OrdersViewModel
+    @State private var navigationPath: [Order] = []
     
     init(ordersSubject: PassthroughSubject<[Order], Never>) {
         self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject))
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath, root: {
             List(viewModel.orders, id: \.self) { order in
-                orderCardView(for: order)
+                NavigationLink(value: order) {
+                    HStack {
+                        Text(order.description)
+                            .font(.title2)
+                        Text("\(order.price)$")
+                    }
+                }
             }
             .navigationTitle("Orders")
-        }
-    }
-    
-    private func orderCardView(for order: Order) -> some View {
-        HStack {
-            AsyncImage(url: URL(string: order.imageUrl)) { image in
-                image.resizable()
-                    .frame(maxWidth: 100, maxHeight: 100)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            } placeholder: {
-                ProgressView()
-            }
-            .ignoresSafeArea(.all, edges: [.top, .bottom])
-                
-            VStack {
-                HStack {
-                    Text(order.description)
-                        .font(.title2)
-                    Spacer()
-                }
-                Spacer()
-                HStack {
-                    Text("\(order.price)")
-                    Spacer()
-                    Text("\(order.status.rawValue.capitalized)")
-                    Circle()
-                        .foregroundStyle(order.status.statusColor)
-                        .frame(maxWidth: 20, maxHeight: 20)
+            .navigationDestination(for: Order.self) { order in
+                if let binding = viewModel.bindingFor(order: order) {
+                    OrderDetailsView(order: binding)
+                } else {
+                    Text("No order found")
                 }
             }
-        }
-        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
-        .padding()
+        })
     }
 }

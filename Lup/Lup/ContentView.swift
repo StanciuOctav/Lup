@@ -17,10 +17,14 @@ struct ContentView: View {
             ForEach(viewModel.customers, id: \.id) { customer in
                 Text(customer.name)
             }
+            ForEach(viewModel.orders, id: \.id) { order in
+                Text(order.description)
+            }
         }
         .padding()
         .task {
-            await viewModel.fetchCustomers()
+//            await viewModel.fetchCustomers()
+            await viewModel.fetchOrders()
         }
     }
 }

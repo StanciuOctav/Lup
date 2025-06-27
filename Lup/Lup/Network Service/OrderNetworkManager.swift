@@ -1,5 +1,5 @@
 //
-//  CustomerNetworkManager.swift
+//  OrderNetworkManager.swift
 //  Lup
 //
 //  Created by Octav Stanciu on 27.06.2025.
@@ -9,14 +9,15 @@ import Combine
 import Constants
 import Foundation
 
-final class CustomerNetworkManager: NetworkServiceProtocol {
-    typealias T = Customer
+final class OrderNetworkManager: NetworkServiceProtocol {
+    typealias T = Order
     
     private var cancellables: Set<AnyCancellable> = []
     
     func fetchData(completion: @escaping (Result<[T], any Error>) -> Void) async {
         guard let url = URL(string: requestDataURL()) else { return }
         let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
         
         URLSession.shared.dataTaskPublisher(for: url)
             .tryCompactMap { data, response in
@@ -50,6 +51,6 @@ final class CustomerNetworkManager: NetworkServiceProtocol {
     }
     
     private func requestDataURL() -> String {
-        return "\(Constants.mockURL)\(Constants.getCustomersEndpoint)"
+        return "\(Constants.mockURL)\(Constants.getOrdersEndpoint)"
     }
 }

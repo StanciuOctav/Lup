@@ -14,6 +14,6 @@ struct Order: Decodable, Identifiable {
     var description: String
     var price: Int
     var customerId: Int
-    var imageURL: String
+    var imageUrl: String
     var status: OrderStatus
 }

@@ -9,7 +9,7 @@ enum OrderStatus: String, Decodable {
     case new, pending, delivered
 }
 
-struct Order: Decodable {
+struct Order: Decodable, Identifiable {
     var id: Int
     var description: String
     var price: Int

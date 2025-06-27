@@ -9,11 +9,19 @@ import Constants
 import SwiftUI
 
 struct ContentView: View {
+    
+    @StateObject private var viewModel = ContentViewModel()
+    
     var body: some View {
         VStack {
-            Text(Constants.mockURL)
+            ForEach(viewModel.customers, id: \.id) { customer in
+                Text(customer.name)
+            }
         }
         .padding()
+        .task {
+            await viewModel.fetchCustomers()
+        }
     }
 }
 

@@ -13,19 +13,47 @@ struct ContentView: View {
     @StateObject private var viewModel = ContentViewModel()
     
     var body: some View {
-        VStack {
-            ForEach(viewModel.customers, id: \.id) { customer in
-                Text(customer.name)
+        NavigationStack {
+            List(viewModel.orders, id: \.self) { order in
+                orderCardView(for: order)
             }
-            ForEach(viewModel.orders, id: \.id) { order in
-                Text(order.description)
-            }
+            .navigationTitle("Orders")
         }
-        .padding()
         .task {
-//            await viewModel.fetchCustomers()
             await viewModel.fetchOrders()
         }
+    }
+    
+    private func orderCardView(for order: Order) -> some View {
+        HStack {
+            AsyncImage(url: URL(string: order.imageUrl)) { image in
+                image.resizable()
+                    .frame(maxWidth: 100, maxHeight: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+            } placeholder: {
+                ProgressView()
+            }
+            .ignoresSafeArea(.all, edges: [.top, .bottom])
+                
+            VStack {
+                HStack {
+                    Text(order.description)
+                        .font(.title2)
+                    Spacer()
+                }
+                Spacer()
+                HStack {
+                    Text("\(order.price)")
+                    Spacer()
+                    Text("\(order.status.rawValue.capitalized)")
+                    Circle()
+                        .foregroundStyle(order.status.statusColor)
+                        .frame(maxWidth: 20, maxHeight: 20)
+                }
+            }
+        }
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        .padding()
     }
 }
 

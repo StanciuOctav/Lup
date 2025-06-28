@@ -13,11 +13,14 @@ struct OrdersView: View {
     
     @StateObject private var viewModel: OrdersViewModel
     @State private var navigationPath: [Order] = []
+    @ObservedObject var navigationManager: NavigationManager
     
     init(ordersSubject: CurrentValueSubject<[Order], Never>, 
-         notificationService: NotificationService) {
+         notificationService: NotificationService,
+         navigationManager: NavigationManager) {
         self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject,
                                                                    notificationService: notificationService))
+        self.navigationManager = navigationManager
     }
     
     var body: some View {
@@ -52,5 +55,31 @@ struct OrdersView: View {
                 }
             }
         })
+        .onChange(of: navigationManager.shouldNavigate) { _, shouldNavigate in
+            if shouldNavigate {
+                handleNavigation()
+                navigationManager.resetNavigation()
+            }
+        }
+    }
+    
+    private func handleNavigation() {
+        let route = navigationManager.currentRoute
+        
+        switch route {
+        case .orderDetails(let orderId):
+            navigateToOrder(orderId: orderId)
+        case .orders:
+            // Deja aici, nu avem unde sa facem navigare
+            break
+        default:
+            break
+        }
+    }
+    
+    private func navigateToOrder(orderId: Int) {
+        if let order = viewModel.orders.first(where: { $0.id == orderId }) {
+            navigationPath.append(order)
+        }
     }
 }

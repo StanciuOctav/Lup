@@ -9,7 +9,7 @@ import CoreLocation
 import Foundation
 
 @MainActor
-final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class LocationService: NSObject, ObservableObject {
     
     @Published var userLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus = .denied
@@ -33,26 +33,6 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             break
         case .authorizedAlways, .authorizedWhenInUse, .authorized:
             locationManager.startUpdatingLocation()
-        @unknown default:
-            break
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let current = locations.first else { return }
-        userLocation = current
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        authorizationStatus = status
-        
-        switch status {
-        case .authorizedAlways, .authorizedWhenInUse, .authorized:
-            locationManager.startUpdatingLocation()
-        case .denied, .restricted:
-            locationManager.stopUpdatingLocation()
-        case .notDetermined:
-            break
         @unknown default:
             break
         }
@@ -83,3 +63,25 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         locationManager.stopUpdatingLocation()
     }
 } 
+
+extension LocationService: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let current = locations.first else { return }
+        userLocation = current
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        authorizationStatus = status
+        
+        switch status {
+        case .authorizedAlways, .authorizedWhenInUse, .authorized:
+            locationManager.startUpdatingLocation()
+        case .denied, .restricted:
+            locationManager.stopUpdatingLocation()
+        case .notDetermined:
+            break
+        @unknown default:
+            break
+        }
+    }
+}

@@ -29,7 +29,7 @@ final class OrdersViewModel: ObservableObject {
     func updateOrderStatus(_ newStatus: OrderStatus) {
         if let selectedOrderIndex {
             orders[selectedOrderIndex].status = newStatus
-            notificationService.scheduleNotificationForOrderUpdate(order: orders[selectedOrderIndex])
+            notificationService.sheduleUpdateOrderNotification(order: orders[selectedOrderIndex])
         }
     }
     

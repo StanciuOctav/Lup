@@ -13,20 +13,21 @@ struct RootView: View {
                                                                                                url: URL(string: "\(Constants.mockURL)\(Constants.getCustomersEndpoint)")!),
                                                        orderService: OrderNetworkService(service: DefaultNetworkService(),
                                                                                          url: URL(string: "\(Constants.mockURL)\(Constants.getOrdersEndpoint)")!))
+    @StateObject private var locationService = LocationService()
     
     var body: some View {
         TabView {
+            CustomersView(customersSubject: viewModel.customersSubject, locationService: locationService)
+                .tabItem {
+                    Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
+                }
             OrdersView(ordersSubject: viewModel.ordersSubject)
                 .tabItem {
                     Label(LocalizedStringKey("Orders"), systemImage: "list.bullet")
                 }
-            CustomersView(customersSubject: viewModel.customersSubject)
-                .tabItem {
-                    Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
-                }
         }
-        .task {
-            await viewModel.fetchData()
+        .onAppear {
+            viewModel.fetchData()
         }
     }
 }

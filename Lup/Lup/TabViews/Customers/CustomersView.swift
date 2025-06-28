@@ -12,9 +12,11 @@ struct CustomersView: View {
     
     @StateObject private var viewModel: CustomersViewModel
     
-    init(customersSubject: PassthroughSubject<[Customer], Never>) {
-        _viewModel = StateObject(wrappedValue: CustomersViewModel(customersSubject: customersSubject))
+    init(customersSubject: CurrentValueSubject<[Customer], Never>, locationService: LocationService) {
+        _viewModel = StateObject(wrappedValue: CustomersViewModel(customersSubject: customersSubject,
+                                                                  locationService: locationService))
     }
+    
     var body: some View {
         NavigationStack {
             List(viewModel.customers, id: \.self) { customer in

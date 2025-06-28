@@ -5,21 +5,20 @@
 //  Created by Octav Stanciu on 27.06.2025.
 //
 
-import CoreLocation
 import Combine
+import CoreLocation
 import SwiftUI
 
-final class CustomersViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+@MainActor
+final class CustomersViewModel: ObservableObject {
     
     @Published var customers: [Customer] = []
-    @Published var userLocation: CLLocation?
-    @Published var authorizationStatus: CLAuthorizationStatus = .denied
     
     private var cancellables: Set<AnyCancellable> = []
-    private let locationManager = CLLocationManager()
+    private let locationService: LocationService
     
-    init(customersSubject: PassthroughSubject<[Customer], Never>) {
-        super.init()
+    init(customersSubject: CurrentValueSubject<[Customer], Never>, locationService: LocationService) {
+        self.locationService = locationService
         
         customersSubject
             .sink { [weak self] customers in
@@ -27,37 +26,13 @@ final class CustomersViewModel: NSObject, ObservableObject, CLLocationManagerDel
                 self.customers = customers
             }
             .store(in: &cancellables)
-        
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        
-        switch locationManager.authorizationStatus {
-        case .notDetermined, .restricted, .denied:
-            fallthrough
-        case .authorizedAlways, .authorizedWhenInUse, .authorized:
-            locationManager.startUpdatingLocation()
-        @unknown default:
-            break
-        }
-        authorizationStatus = locationManager.authorizationStatus
     }
     
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-            guard let current = locations.first else { return }
-            userLocation = current
+    var authorizationStatus: CLAuthorizationStatus {
+        locationService.authorizationStatus
     }
     
     func calculateDistanceTo(latitude: Double, longitude: Double) -> String {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        let m = Measurement(value: userLocation?.distance(from: location) ?? 0, unit: UnitLength.meters)
-        let km = m.converted(to: UnitLength.kilometers)
-        let value = km.value < 1 ? m : km
-        
-        let formatter = MeasurementFormatter()
-        formatter.unitOptions = .providedUnit
-        formatter.numberFormatter.maximumFractionDigits = 2
-
-        return formatter.string(from: value)
+        locationService.calculateDistanceTo(latitude: latitude, longitude: longitude)
     }
 }

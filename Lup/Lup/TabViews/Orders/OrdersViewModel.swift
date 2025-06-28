@@ -14,7 +14,7 @@ final class OrdersViewModel: ObservableObject {
     
     private var cancellables: Set<AnyCancellable> = []
 
-    init(ordersSubject: PassthroughSubject<[Order], Never>) {
+    init(ordersSubject: CurrentValueSubject<[Order], Never>) {
         ordersSubject
             .sink { [weak self] orders in
                 guard let self else { return }

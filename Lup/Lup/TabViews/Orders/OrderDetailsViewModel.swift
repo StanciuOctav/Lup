@@ -18,5 +18,6 @@ final class OrderDetailsViewModel: ObservableObject {
     
     func changeOrderStatusTo(_ status: OrderStatus) {
         order.status = status
+        onDismiss(status)
     }
 }

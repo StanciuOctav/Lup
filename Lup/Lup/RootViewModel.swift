@@ -13,8 +13,8 @@ final class RootViewModel: ObservableObject {
     @Published var customers: [Customer] = []
     @Published var orders: [Order] = []
 
-    var customersSubject = PassthroughSubject<[Customer], Never>()
-    var ordersSubject = PassthroughSubject<[Order], Never>()
+    var customersSubject = CurrentValueSubject<[Customer], Never>([])
+    var ordersSubject = CurrentValueSubject<[Order], Never>([])
 
     private let customerService: CustomerNetworkService
     private let orderService: OrderNetworkService
@@ -35,6 +35,7 @@ final class RootViewModel: ObservableObject {
 
             switch result {
             case .success(let customers):
+                self.customers = customers
                 self.customersSubject.send(customers)
             case .failure(let error):
                 print("Error fetching customers: \(error)")
@@ -48,6 +49,7 @@ final class RootViewModel: ObservableObject {
 
             switch result {
             case .success(let orders):
+                self.orders = orders
                 self.ordersSubject.send(orders)
             case .failure(let error):
                 print("Error fetching orders: \(error)")

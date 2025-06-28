@@ -75,8 +75,5 @@ struct OrderDetailsView: View {
                 }
             }
         }
-        .onDisappear {
-            viewModel.onDismiss(viewModel.order.status)
-        }
     }
 }

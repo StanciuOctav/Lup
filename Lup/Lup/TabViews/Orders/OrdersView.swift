@@ -14,7 +14,7 @@ struct OrdersView: View {
     @StateObject private var viewModel: OrdersViewModel
     @State private var navigationPath: [Order] = []
     
-    init(ordersSubject: PassthroughSubject<[Order], Never>) {
+    init(ordersSubject: CurrentValueSubject<[Order], Never>) {
         self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject))
     }
     

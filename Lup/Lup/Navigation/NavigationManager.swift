@@ -24,8 +24,8 @@ final class NavigationManager: NSObject, ObservableObject {
         shouldNavigate = true
     }
     
-    func navigateToOrder(_ orderId: Int) {
-        navigate(to: .orderDetails(orderId: orderId))
+    func navigateToOrder(at index: Int) {
+        navigate(to: .orderDetails(orderIndex: index))
     }
     
     func navigateToOrdersTab() {
@@ -49,9 +49,8 @@ extension NavigationManager: UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         
-        if let orderId = userInfo["orderId"] as? Int {
-            print("Navigation: Notification tapped for order: \(orderId)")
-            navigateToOrder(orderId)
+        if let orderIndex = userInfo["orderIndex"] as? Int {
+            navigateToOrder(at: orderIndex)
         }
         
         completionHandler()

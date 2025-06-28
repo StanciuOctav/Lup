@@ -20,20 +20,20 @@ final class NotificationService: ObservableObject {
         }
     }
     
-    func sheduleUpdateOrderNotification(order: Order) {
+    func sheduleUpdateOrderNotification(description: String, orderIndex: Int) {
         let content = UNMutableNotificationContent()
-        content.title = "\(order.description)"
+        content.title = "\(description)"
         content.body = "Order was updated"
         content.sound = .default
         
         content.userInfo = [
-            "orderId": order.id,
-            "deepLink": "lup://order/\(order.id)"
+            "orderIndex": orderIndex,
+            "deepLink": "lup://order/\(orderIndex)"
         ]
         
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 4, repeats: false)
         
-        let request = UNNotificationRequest(identifier: "OrderUpdateNotification_\(order.id)", content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: "OrderUpdateNotification_\(orderIndex)", content: content, trigger: trigger)
         
         UNUserNotificationCenter.current().add(request) { error in
             if let error {

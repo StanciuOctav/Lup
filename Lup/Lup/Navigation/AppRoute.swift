@@ -10,7 +10,7 @@ import Foundation
 enum AppRoute: Hashable {
     case customers
     case orders
-    case orderDetails(orderId: Int)
+    case orderDetails(orderIndex: Int)
     
     var tab: TabSelection {
         switch self {
@@ -19,10 +19,10 @@ enum AppRoute: Hashable {
         }
     }
     
-    var orderId: Int? {
+    var orderIndex: Int? {
         switch self {
-        case .orderDetails(let orderId):
-            return orderId
+        case .orderDetails(let orderIndex):
+            return orderIndex
         default:
             return nil
         }
@@ -45,11 +45,11 @@ extension AppRoute {
                 return nil
             }
         case 3:
-            // lup://order/123
+            // lup://order/123 
             switch pathComponents[1] {
             case "order":
-                guard let orderId = Int(pathComponents[2]) else { return nil }
-                self = .orderDetails(orderId: orderId)
+                guard let orderIndex = Int(pathComponents[2]) else { return nil }
+                self = .orderDetails(orderIndex: orderIndex)
             default:
                 return nil
             }
@@ -62,7 +62,7 @@ extension AppRoute {
         switch self {
         case .customers: nil
         case .orders: URL(string: "lup://orders")
-        case .orderDetails(let orderId): URL(string: "lup://order/\(orderId)")
+        case .orderDetails(let orderIndex): URL(string: "lup://order/\(orderIndex)")
         }
     }
 } 

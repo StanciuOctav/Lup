@@ -67,8 +67,8 @@ struct OrdersView: View {
         let route = navigationManager.currentRoute
         
         switch route {
-        case .orderDetails(let orderId):
-            navigateToOrder(orderId: orderId)
+        case .orderDetails(let orderIndex):
+            navigateToOrder(at: orderIndex)
         case .orders:
             // Deja aici, nu avem unde sa facem navigare
             break
@@ -77,9 +77,10 @@ struct OrdersView: View {
         }
     }
     
-    private func navigateToOrder(orderId: Int) {
-        if let order = viewModel.orders.first(where: { $0.id == orderId }) {
-            navigationPath.append(order)
-        }
+    private func navigateToOrder(at index: Int) {
+        guard index >= 0 && index < viewModel.orders.count else { return }
+        
+        let order = viewModel.orders[index]
+        navigationPath.append(order)
     }
 }

@@ -14,6 +14,7 @@ struct OrdersView: View {
     @ObservedObject var navigationManager: NavigationManager
     @StateObject private var viewModel: OrdersViewModel
     @State private var navigationPath: [Order] = []
+    @State private var isFilteringSheetPresented: Bool = false
     
     init(ordersSubject: CurrentValueSubject<[Order], Never>, 
          notificationService: NotificationService,
@@ -73,10 +74,22 @@ struct OrdersView: View {
                             }
                         }
                     } label: {
-                        Image(systemName: "arrow.up.arrow.down")
+                        Image(systemName: "arrow.up.arrow.down.circle")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isFilteringSheetPresented = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
                     }
                 }
             }
+        })
+        .sheet(isPresented: $isFilteringSheetPresented, content: {
+            FiltersView(filterConfigurator: viewModel.filterConfigurator,
+                        customersIds: viewModel.customersIds)
         })
         .onChange(of: navigationManager.shouldNavigate) { _, shouldNavigate in
             if shouldNavigate {

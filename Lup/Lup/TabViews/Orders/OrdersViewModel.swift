@@ -13,6 +13,8 @@ final class OrdersViewModel: ObservableObject {
     @Published var filteredOrders: [Order] = []
     @Published var sortOption: SortOption = .priceAscending
     @Published var searchText: String = ""
+    
+    let filterConfigurator = FiltersConfigurator()
     private var notificationService: NotificationService
     
     private var cancellables: Set<AnyCancellable> = []
@@ -24,7 +26,14 @@ final class OrdersViewModel: ObservableObject {
             .sink { [weak self] orders in
                 guard let self else { return }
                 self.orders = orders
-                self.applySearchAndFilters()
+                self.applySearchSortFilter()
+            }
+            .store(in: &cancellables)
+        
+        filterConfigurator.objectWillChange
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.applySearchSortFilter()
             }
             .store(in: &cancellables)
     }
@@ -35,7 +44,7 @@ final class OrdersViewModel: ObservableObject {
             notificationService.sheduleUpdateOrderNotification(description: orders[selectedOrderIndex].description,
                                                                orderIndex: selectedOrderIndex)
             filteredOrders = orders
-            applySearchAndFilters()
+            applySearchSortFilter()
         }
     }
 }
@@ -43,7 +52,7 @@ final class OrdersViewModel: ObservableObject {
 extension OrdersViewModel {
     func updateSearchText(with newValue: String) {
         searchText = newValue
-        applySearchAndFilters()
+        applySearchSortFilter()
     }
 }
 
@@ -51,21 +60,26 @@ extension OrdersViewModel {
     
     func updateSortOption(_ sortOption: SortOption) {
         self.sortOption = sortOption
-        applySearchAndFilters()
+        applySearchSortFilter()
     }
     
     func resetOrders() {
         filteredOrders = orders
     }
     
-    private func applySearchAndFilters() {
+    var customersIds: [Int] {
+        Array(Set(orders.map { $0.customerId })).sorted()
+    }
+    
+    private func applySearchSortFilter() {
         var filtered = orders
         
         if !searchText.isEmpty {
-            filtered = orders.filter({ $0.description.lowercased().contains(searchText.lowercased()) })
+            filtered = filtered.filter({ $0.description.lowercased().contains(searchText.lowercased()) })
         }
         
-        self.sortOption = sortOption
+        filtered = filterConfigurator.applyFilters(to: filtered)
+        
         switch sortOption {
         case .priceAscending:
             filtered = filtered.sorted { $0.price < $1.price }

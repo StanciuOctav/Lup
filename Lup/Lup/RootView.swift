@@ -14,6 +14,7 @@ struct RootView: View {
                                                        orderService: OrderNetworkService(service: DefaultNetworkService(),
                                                                                          url: URL(string: "\(Constants.mockURL)\(Constants.getOrdersEndpoint)")!))
     @StateObject private var locationService = LocationService()
+    @StateObject private var notificationService = NotificationService()
     
     var body: some View {
         TabView {
@@ -21,7 +22,8 @@ struct RootView: View {
                 .tabItem {
                     Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
                 }
-            OrdersView(ordersSubject: viewModel.ordersSubject)
+            OrdersView(ordersSubject: viewModel.ordersSubject, 
+                      notificationService: notificationService)
                 .tabItem {
                     Label(LocalizedStringKey("Orders"), systemImage: "list.bullet")
                 }

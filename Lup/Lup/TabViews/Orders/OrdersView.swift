@@ -14,8 +14,10 @@ struct OrdersView: View {
     @StateObject private var viewModel: OrdersViewModel
     @State private var navigationPath: [Order] = []
     
-    init(ordersSubject: CurrentValueSubject<[Order], Never>) {
-        self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject))
+    init(ordersSubject: CurrentValueSubject<[Order], Never>, 
+         notificationService: NotificationService) {
+        self._viewModel = StateObject(wrappedValue: OrdersViewModel(ordersSubject: ordersSubject,
+                                                                   notificationService: notificationService))
     }
     
     var body: some View {

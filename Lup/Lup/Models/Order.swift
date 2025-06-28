@@ -20,6 +20,17 @@ enum OrderStatus: String, CaseIterable, Decodable {
                 .green
         }
     }
+    
+    var sortValue: Int {
+        switch self {
+        case .new:
+            1
+        case .pending:
+            2
+        case .delivered:
+            3
+        }
+    }
 }
 
 struct Order: Decodable, Identifiable {

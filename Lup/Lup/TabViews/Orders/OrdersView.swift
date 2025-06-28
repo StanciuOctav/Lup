@@ -11,9 +11,9 @@ import SwiftUI
 
 struct OrdersView: View {
     
+    @ObservedObject var navigationManager: NavigationManager
     @StateObject private var viewModel: OrdersViewModel
     @State private var navigationPath: [Order] = []
-    @ObservedObject var navigationManager: NavigationManager
     
     init(ordersSubject: CurrentValueSubject<[Order], Never>, 
          notificationService: NotificationService,
@@ -25,7 +25,7 @@ struct OrdersView: View {
     
     var body: some View {
         NavigationStack(path: $navigationPath, root: {
-            List(viewModel.orders, id: \.self) { order in
+            List(viewModel.filteredOrders, id: \.self) { order in
                 NavigationLink(value: order) {
                     HStack {
                         VStack(alignment: .leading) {
@@ -50,8 +50,22 @@ struct OrdersView: View {
             .navigationTitle("Orders")
             .navigationDestination(for: Order.self) { order in
                 OrderDetailsView(order: order) { newStatus in
-                    viewModel.updateSelectedIndex(order: order)
-                    viewModel.updateOrderStatus(newStatus)
+                    viewModel.updateOrderStatus(for: order, with: newStatus)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        ForEach(SortOption.allCases, id: \.self) { sortOption in
+                            Button {
+                                viewModel.updateSortOption(sortOption)
+                            } label: {
+                                Text(sortOption.description)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                    }
                 }
             }
         })

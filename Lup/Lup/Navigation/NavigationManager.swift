@@ -56,7 +56,8 @@ extension NavigationManager: UNUserNotificationCenterDelegate {
         completionHandler()
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.badge, .banner, .sound])
-    }
+    // TODO: Uncomment this if you want notif while app is in foreground
+//    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+//        completionHandler([.badge, .banner, .sound])
+//    }
 }

@@ -22,24 +22,24 @@ struct RootView: View {
     @StateObject private var notificationService = NotificationService()
     @StateObject private var navigationManager = NavigationManager()
     
-    @State private var selectedTab: TabSelection = .customers
+    @State private var selectedTab: TabSelection = .orders
     
     var body: some View {
         TabView(selection: $selectedTab) {
-            CustomersView(customersSubject: viewModel.customersSubject, 
+            OrdersView(ordersSubject: viewModel.ordersSubject,
+                      notificationService: notificationService,
+                      navigationManager: navigationManager)
+                .tabItem {
+                    Label(LocalizedStringKey("Orders"), systemImage: "shippingbox.fill")
+                }
+                .tag(TabSelection.orders)
+            
+            CustomersView(customersSubject: viewModel.customersSubject,
                          locationService: locationService)
                 .tabItem {
                     Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
                 }
                 .tag(TabSelection.customers)
-            
-            OrdersView(ordersSubject: viewModel.ordersSubject, 
-                      notificationService: notificationService,
-                      navigationManager: navigationManager)
-                .tabItem {
-                    Label(LocalizedStringKey("Orders"), systemImage: "list.bullet")
-                }
-                .tag(TabSelection.orders)
         }
         .onAppear {
             viewModel.fetchData()

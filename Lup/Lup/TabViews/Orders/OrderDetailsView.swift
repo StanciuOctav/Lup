@@ -8,17 +8,15 @@ import SwiftUI
 
 struct OrderDetailsView: View {
     @StateObject private var viewModel: OrderDetailsViewModel
-    @Binding var order: Order
     
-    init(order: Binding<Order>) {
-        _viewModel = StateObject(wrappedValue: OrderDetailsViewModel(order: order))
-        self._order = order
+    init(order: Order, onDismiss: @escaping (OrderStatus) -> Void) {
+        _viewModel = StateObject(wrappedValue: OrderDetailsViewModel(order: order, onDismiss: onDismiss))
     }
     
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                AsyncImage(url: URL(string: order.imageUrl)) { phase in
+                AsyncImage(url: URL(string: viewModel.order.imageUrl)) { phase in
                     if let image = phase.image {
                         image
                             .resizable()
@@ -39,21 +37,21 @@ struct OrderDetailsView: View {
                     HStack {
                         Text("Description")
                         Spacer()
-                        Text(order.description)
+                        Text(viewModel.order.description)
                             .font(.title)
                             .fontWeight(.semibold)
                     }
                     HStack {
                         Text("Price")
                         Spacer()
-                        Text("\(order.price) $")
+                        Text("\(viewModel.order.price) $")
                     }
                     HStack {
                         Text("Status")
                         Spacer()
-                        Text(order.status.rawValue.capitalized)
+                        Text(viewModel.order.status.rawValue.capitalized)
                         Circle()
-                            .fill(order.status.statusColor)
+                            .fill(viewModel.order.status.statusColor)
                             .frame(width: 16, height: 16)
                     }
                 }
@@ -65,7 +63,7 @@ struct OrderDetailsView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu("Change order status") {
                         ForEach(OrderStatus.allCases, id: \.self) { status in
-                            if status != order.status {
+                            if status != viewModel.order.status {
                                 Button {
                                     viewModel.changeOrderStatusTo(status)
                                 } label: {
@@ -76,6 +74,9 @@ struct OrderDetailsView: View {
                     }
                 }
             }
+        }
+        .onDisappear {
+            viewModel.onDismiss(viewModel.order.status)
         }
     }
 }

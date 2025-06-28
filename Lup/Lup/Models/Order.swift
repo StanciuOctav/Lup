@@ -48,6 +48,7 @@ extension Order: Equatable {
         lhs.description == rhs.description &&
         lhs.price == rhs.price &&
         lhs.customerId == rhs.customerId &&
-        lhs.imageUrl == rhs.imageUrl
+        lhs.imageUrl == rhs.imageUrl &&
+        lhs.status == rhs.status
     }
 }

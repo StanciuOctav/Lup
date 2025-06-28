@@ -10,6 +10,7 @@ import SwiftUI
 
 final class OrdersViewModel: ObservableObject {
     @Published var orders: [Order] = []
+    private var selectedOrderIndex: Int?
     
     private var cancellables: Set<AnyCancellable> = []
 
@@ -22,12 +23,13 @@ final class OrdersViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    func bindingFor(order: Order) -> Binding<Order>? {
-        guard  let index = orders.firstIndex(of: order) else { return nil }
-        return Binding {
-            self.orders[index]
-        } set: {
-            self.orders[index] = $0
+    func updateOrderStatus(_ newStatus: OrderStatus) {
+        if let selectedOrderIndex {
+            orders[selectedOrderIndex].status = newStatus
         }
+    }
+    
+    func updateSelectedIndex(order: Order) {
+        selectedOrderIndex = orders.firstIndex(where: { $0 == order })
     }
 }

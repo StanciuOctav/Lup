@@ -8,10 +8,12 @@
 import SwiftUI
 
 final class OrderDetailsViewModel: ObservableObject {
-    @Binding var order: Order
+    @Published var order: Order
+    let onDismiss: (OrderStatus) -> Void
 
-    init(order: Binding<Order>) {
-        self._order = order
+    init(order: Order, onDismiss: @escaping (OrderStatus) -> Void) {
+        self.order = order
+        self.onDismiss = onDismiss
     }
     
     func changeOrderStatusTo(_ status: OrderStatus) {

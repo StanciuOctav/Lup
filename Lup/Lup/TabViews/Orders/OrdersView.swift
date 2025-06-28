@@ -23,18 +23,30 @@ struct OrdersView: View {
             List(viewModel.orders, id: \.self) { order in
                 NavigationLink(value: order) {
                     HStack {
-                        Text(order.description)
-                            .font(.title2)
-                        Text("\(order.price)$")
+                        VStack(alignment: .leading) {
+                            Text(order.description)
+                                .font(.title2)
+                            Text("\(order.price)$")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        HStack {
+                            Text(order.status.rawValue.capitalized)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Circle()
+                                .fill(order.status.statusColor)
+                                .frame(width: 12, height: 12)
+                        }
                     }
                 }
             }
             .navigationTitle("Orders")
             .navigationDestination(for: Order.self) { order in
-                if let binding = viewModel.bindingFor(order: order) {
-                    OrderDetailsView(order: binding)
-                } else {
-                    Text("No order found")
+                OrderDetailsView(order: order) { newStatus in
+                    viewModel.updateSelectedIndex(order: order)
+                    viewModel.updateOrderStatus(newStatus)
                 }
             }
         })

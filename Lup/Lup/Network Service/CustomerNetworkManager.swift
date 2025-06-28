@@ -1,5 +1,5 @@
 //
-//  CustomerNetworkManager.swift
+//  CustomerNetworkService.swift
 //  Lup
 //
 //  Created by Octav Stanciu on 27.06.2025.
@@ -9,47 +9,25 @@ import Combine
 import Constants
 import Foundation
 
-final class CustomerNetworkManager: NetworkServiceProtocol {
-    typealias T = Customer
+final class CustomerNetworkService {
+    private let service: NetworkServiceProtocol
+    private let url: URL
+    private var cancellables = Set<AnyCancellable>()
     
-    private var cancellables: Set<AnyCancellable> = []
+    init(service: NetworkServiceProtocol, url: URL) {
+        self.service = service
+        self.url = url
+    }
     
-    func fetchData(completion: @escaping (Result<[T], any Error>) -> Void) async {
-        guard let url = URL(string: requestDataURL()) else { return }
-        let decoder = JSONDecoder()
-        
-        URLSession.shared.dataTaskPublisher(for: url)
-            .tryCompactMap { data, response in
-                guard let response = response as? HTTPURLResponse,
-                      (200...299).contains(response.statusCode) else {
-                    completion(.failure(URLError(.badServerResponse)))
-                    return nil
-                }
-                return data
-            }
-            .decode(type: [T].self, decoder: decoder)
-            .eraseToAnyPublisher()
+    func fetchData(completion: @escaping (Result<[Customer], Error>) -> Void) {
+        service.fetchData(from: url, as: [Customer].self)
             .sink(receiveCompletion: { status in
-                switch status {
-                case .finished:
-                    print("Customers completed fetching")
-                    break
-                case .failure(let error):
-                    print("Receiver error \(error)")
+                if case .failure(let error) = status {
                     completion(.failure(error))
-                    break
                 }
             }, receiveValue: { customers in
                 completion(.success(customers))
             })
             .store(in: &cancellables)
-    }
-    
-    deinit {
-        cancellables.removeAll()
-    }
-    
-    private func requestDataURL() -> String {
-        return "\(Constants.mockURL)\(Constants.getCustomersEndpoint)"
     }
 }

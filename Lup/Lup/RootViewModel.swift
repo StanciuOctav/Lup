@@ -8,47 +8,49 @@
 import Combine
 import SwiftUI
 
+@MainActor
 final class RootViewModel: ObservableObject {
     @Published var customers: [Customer] = []
     @Published var orders: [Order] = []
-    
-    var customersSubject: PassthroughSubject<[Customer], Never> = .init()
-    var ordersSubject: PassthroughSubject<[Order], Never> = .init()
-    
-    private let customerManager = CustomerNetworkManager()
-    private let orderManager = OrderNetworkManager()
-    
-    func fetchData() async {
-        await fetchCustomers()
-        await fetchOrders()
+
+    var customersSubject = PassthroughSubject<[Customer], Never>()
+    var ordersSubject = PassthroughSubject<[Order], Never>()
+
+    private let customerService: CustomerNetworkService
+    private let orderService: OrderNetworkService
+
+    init(customerService: CustomerNetworkService, orderService: OrderNetworkService) {
+        self.customerService = customerService
+        self.orderService = orderService
     }
-    
-    private func fetchCustomers() async {
-        await customerManager.fetchData { [weak self] results in
+
+    func fetchData() {
+        fetchCustomers()
+        fetchOrders()
+    }
+
+    private func fetchCustomers() {
+        customerService.fetchData { [weak self] result in
             guard let self else { return }
-            
-            switch results {
+
+            switch result {
             case .success(let customers):
-                Task { @MainActor in
-                    self.customersSubject.send(customers)
-                }
-            case .failure(let failure):
-                print("Failed to fetch data: \(failure)")
+                self.customersSubject.send(customers)
+            case .failure(let error):
+                print("Error fetching customers: \(error)")
             }
         }
     }
-    
-    private func fetchOrders() async {
-        await orderManager.fetchData { [weak self] results in
+
+    private func fetchOrders() {
+        orderService.fetchData { [weak self] result in
             guard let self else { return }
-            
-            switch results {
+
+            switch result {
             case .success(let orders):
-                Task { @MainActor in
-                    self.ordersSubject.send(orders)
-                }
-            case .failure(let failure):
-                print("Failed to fetch data: \(failure)")
+                self.ordersSubject.send(orders)
+            case .failure(let error):
+                print("Error fetching orders: \(error)")
             }
         }
     }

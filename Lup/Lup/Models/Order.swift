@@ -29,6 +29,15 @@ struct Order: Decodable, Identifiable {
     var customerId: Int
     var imageUrl: String
     var status: OrderStatus
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case description
+        case price
+        case customerId = "customer_id"
+        case imageUrl = "image_url"
+        case status
+    }
 }
 
 extension Order: Hashable {

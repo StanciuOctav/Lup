@@ -47,6 +47,10 @@ struct OrdersView: View {
                     }
                 }
             }
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer, prompt: "Search orders...")
+            .onChange(of: viewModel.searchText, { _, newValue in
+                viewModel.updateSearchText(with: newValue)
+            })
             .navigationTitle("Orders")
             .navigationDestination(for: Order.self) { order in
                 OrderDetailsView(order: order) { newStatus in
@@ -60,11 +64,16 @@ struct OrdersView: View {
                             Button {
                                 viewModel.updateSortOption(sortOption)
                             } label: {
-                                Text(sortOption.description)
+                                HStack {
+                                    Text(sortOption.description)
+                                    if sortOption == viewModel.sortOption {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
                             }
                         }
                     } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle.fill")
+                        Image(systemName: "arrow.up.arrow.down")
                     }
                 }
             }

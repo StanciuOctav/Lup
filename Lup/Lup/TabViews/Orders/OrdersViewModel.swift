@@ -8,25 +8,11 @@
 import Combine
 import SwiftUI
 
-enum SortOption: Int, CaseIterable {
-    
-    case priceAscending
-    case priceDiscending
-    case status
-    
-    var description: String {
-        switch self {
-        case .priceAscending: "Price Ascending"
-        case .priceDiscending: "Price Discending"
-        case .status: "Status"
-        }
-    }
-}
-
 final class OrdersViewModel: ObservableObject {
     @Published var orders: [Order] = []
     @Published var filteredOrders: [Order] = []
     @Published var sortOption: SortOption = .priceAscending
+    @Published var searchText: String = ""
     private var notificationService: NotificationService
     
     private var cancellables: Set<AnyCancellable> = []
@@ -55,6 +41,13 @@ final class OrdersViewModel: ObservableObject {
 }
 
 extension OrdersViewModel {
+    func updateSearchText(with newValue: String) {
+        searchText = newValue
+        applySearchAndFilters()
+    }
+}
+
+extension OrdersViewModel {
     
     func updateSortOption(_ sortOption: SortOption) {
         self.sortOption = sortOption
@@ -67,6 +60,10 @@ extension OrdersViewModel {
     
     private func applySearchAndFilters() {
         var filtered = orders
+        
+        if !searchText.isEmpty {
+            filtered = orders.filter({ $0.description.lowercased().contains(searchText.lowercased()) })
+        }
         
         self.sortOption = sortOption
         switch sortOption {

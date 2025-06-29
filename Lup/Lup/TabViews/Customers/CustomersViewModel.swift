@@ -35,4 +35,12 @@ final class CustomersViewModel: ObservableObject {
     func calculateDistanceTo(latitude: Double, longitude: Double) -> String {
         locationService.calculateDistanceTo(latitude: latitude, longitude: longitude)
     }
+    
+    func getUserLocationPublisher() -> AnyPublisher<CLLocation?, Never> {
+        locationService.getUserLocationPublisher()
+    }
+    
+    func getCustomersPublisher() -> AnyPublisher<[Customer], Never> {
+        $customers.eraseToAnyPublisher()
+    }
 }

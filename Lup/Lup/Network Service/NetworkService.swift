@@ -16,7 +16,7 @@ final class DefaultNetworkService: NetworkServiceProtocol {
         return URLSession.shared.dataTaskPublisher(for: url)
             .tryMap { data, response in
                 guard let response = response as? HTTPURLResponse,
-                      200...299 ~= response.statusCode else {
+                      (200...299).contains(response.statusCode) else {
                     throw URLError(.badServerResponse)
                 }
                 return data

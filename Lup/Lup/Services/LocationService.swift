@@ -5,6 +5,7 @@
 //  Created by Octav Stanciu on 27.06.2025.
 //
 
+import Combine
 import CoreLocation
 import Foundation
 
@@ -13,6 +14,8 @@ final class LocationService: NSObject, ObservableObject {
     
     @Published var userLocation: CLLocation?
     @Published var authorizationStatus: CLAuthorizationStatus = .denied
+    
+    private var userLocationPublisher: CurrentValueSubject<CLLocation?, Never> = .init(nil)
     
     private let locationManager = CLLocationManager()
     
@@ -51,6 +54,10 @@ final class LocationService: NSObject, ObservableObject {
         return formatter.string(from: value)
     }
     
+    func getUserLocationPublisher() -> AnyPublisher<CLLocation?, Never> {
+        userLocationPublisher.eraseToAnyPublisher()
+    }
+    
     func requestLocationPermission() {
         locationManager.requestWhenInUseAuthorization()
     }
@@ -64,10 +71,11 @@ final class LocationService: NSObject, ObservableObject {
     }
 } 
 
-extension LocationService: CLLocationManagerDelegate {
+extension LocationService: @preconcurrency CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let current = locations.first else { return }
         userLocation = current
+        userLocationPublisher.send(userLocation)
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {

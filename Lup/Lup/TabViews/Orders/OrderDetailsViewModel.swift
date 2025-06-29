@@ -19,5 +19,22 @@ final class OrderDetailsViewModel: ObservableObject {
     func changeOrderStatusTo(_ status: OrderStatus) {
         order.status = status
         onDismiss(status)
+        logAnalyticsEvent(status)
+    }
+}
+
+extension OrderDetailsViewModel {
+    private func logAnalyticsEvent(_ status: OrderStatus) {
+        let id = order.id
+        let name = order.description
+        
+        switch status {
+        case .new:
+            Analytics.shared.logEvent(event: .newOrder(orderId: String(id), orderName: name))
+        case .pending:
+            Analytics.shared.logEvent(event: .pendingOrder(orderId: String(id), orderName: name))
+        case .delivered:
+            Analytics.shared.logEvent(event: .deliveredOrder(orderId: String(id), orderName: name))
+        }
     }
 }

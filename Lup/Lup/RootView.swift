@@ -15,9 +15,9 @@ enum TabSelection: Int {
 
 struct RootView: View {
     @StateObject private var viewModel = RootViewModel(customerService: CustomerNetworkService(service: DefaultNetworkService(),
-                                                                                               url: URL(string: "\(Constants.mockURL)\(Constants.getCustomersEndpoint)")!),
+                                                                                               url: URL(string: "\(Constants.Network.mockURL)\(Constants.Network.getCustomersEndpoint)")!),
                                                        orderService: OrderNetworkService(service: DefaultNetworkService(),
-                                                                                         url: URL(string: "\(Constants.mockURL)\(Constants.getOrdersEndpoint)")!))
+                                                                                         url: URL(string: "\(Constants.Network.mockURL)\(Constants.Network.getOrdersEndpoint)")!))
     @StateObject private var locationService = LocationService()
     @StateObject private var notificationService = NotificationService()
     @StateObject private var navigationManager = NavigationManager()
@@ -43,6 +43,7 @@ struct RootView: View {
         }
         .onAppear {
             viewModel.fetchData()
+            Analytics.setShared(with: FirebaseAnalyticsService())
         }
         .onOpenURL { url in
             navigationManager.handleURL(url)

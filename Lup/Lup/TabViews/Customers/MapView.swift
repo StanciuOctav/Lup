@@ -73,6 +73,9 @@ struct MapView: View {
                 }
             }
         }
+        .onAppear {
+            Analytics.shared.logEvent(event: .mapView)
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu("Route selection") {

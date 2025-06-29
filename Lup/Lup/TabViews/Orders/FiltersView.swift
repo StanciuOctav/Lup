@@ -89,6 +89,8 @@ struct FiltersView: View {
                 if filterConfigurator.maxPrice < Double.infinity {
                     maxPriceText = String(Int(filterConfigurator.maxPrice))
                 }
+                
+                Analytics.shared.logEvent(event: .filterView)
             }
         }
     }

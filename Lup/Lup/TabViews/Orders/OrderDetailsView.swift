@@ -74,6 +74,10 @@ struct OrderDetailsView: View {
                     }
                 }
             }
+            .onAppear {
+                Analytics.shared.logEvent(event: .orderDetailsView(orderId: String(viewModel.order.id),
+                                                                   orderName: viewModel.order.description))
+            }
         }
     }
 }

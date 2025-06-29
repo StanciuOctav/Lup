@@ -97,6 +97,9 @@ struct OrdersView: View {
                 navigationManager.resetNavigation()
             }
         }
+        .onAppear {
+            Analytics.shared.logEvent(event: .ordersView)
+        }
     }
     
     private func handleNavigation() {

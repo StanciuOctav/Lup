@@ -44,5 +44,8 @@ struct CustomersView: View {
             }
             .navigationTitle("Customers")
         }
+        .onAppear {
+            Analytics.shared.logEvent(event: .customersView)
+        }
     }
 }

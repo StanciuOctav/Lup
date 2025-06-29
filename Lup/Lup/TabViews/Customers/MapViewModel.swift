@@ -33,15 +33,26 @@ fileprivate struct BoundingBox {
     }
 }
 
+enum RouteOptions: String, CaseIterable {
+    case one, all
+}
+
 fileprivate enum BoundingBoxOption {
-    case all, route
+    case all, singleRoute
+}
+
+struct CustomerRoute: Identifiable {
+    var id = UUID()
+    let route: MKRoute
 }
 
 @MainActor
 final class MapViewModel: ObservableObject {
     @Published var userLocation: CLLocation?
     @Published var annotations: [CustomerAnnotation] = []
-    @Published var route: MKRoute?
+    @Published var selectedRouteOption: RouteOptions = .one
+    @Published var singleRoute: MKRoute?
+    @Published var routes: [CustomerRoute] = []
     @Published var cameraPosition: MapCameraPosition = .automatic
     
     private var customers: [Customer] = []
@@ -62,6 +73,46 @@ final class MapViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    func updateRoutesSelection() {
+        switch selectedRouteOption {
+        case .one:
+            resetMultipleRoutes()
+        case .all:
+            resetSingleRoute()
+            getAllDirections()
+        }
+    }
+    
+    func getAllDirections() {
+        guard let userLocation else { return }
+        
+        Task { [weak self] in
+            guard let self else { return }
+            var newRoutes: [CustomerRoute] = []
+            
+            for annotation in annotations {
+                let request = MKDirections.Request()
+                request.source = MKMapItem(placemark: MKPlacemark(coordinate: userLocation.coordinate))
+                request.destination = MKMapItem(placemark: MKPlacemark(coordinate: annotation.coordinate))
+                request.transportType = .walking
+                
+                do {
+                    let directions = try await MKDirections(request: request).calculate()
+                    if let direction = directions.routes.first {
+                        newRoutes.append(CustomerRoute(route: direction))
+                    }
+                } catch {
+                    print("Error updating route \(error)")
+                }
+            }
+            
+            await MainActor.run {
+                self.routes = newRoutes
+                self.zoomToAllCustomers()
+            }
+        }
+    }
+    
     func getDirections(to newValue: CustomerAnnotation) {
         guard let userLocation else { return }
         
@@ -73,9 +124,9 @@ final class MapViewModel: ObservableObject {
             
             do {
                 let directions = try await MKDirections(request: request).calculate()
-                self?.route = directions.routes.first
+                self?.singleRoute = directions.routes.first
                 
-                if let route = self?.route {
+                if let route = self?.singleRoute {
                     self?.updateRouteCameraPosition(route: route, destination: newValue.coordinate)
                 }
             } catch {
@@ -84,8 +135,18 @@ final class MapViewModel: ObservableObject {
         }
     }
     
-    func resetRoute() {
-        route = nil
+    func resetAllRoutes() {
+        resetMultipleRoutes()
+        resetSingleRoute()
+    }
+    
+    func resetMultipleRoutes() {
+        routes = []
+        zoomToAllCustomers()
+    }
+    
+    func resetSingleRoute() {
+        singleRoute = nil
         zoomToAllCustomers()
     }
     
@@ -95,7 +156,7 @@ final class MapViewModel: ObservableObject {
     }
     
     private func updateRouteCameraPosition(route: MKRoute, destination: CLLocationCoordinate2D) {
-        guard let box = boundingBox(for: .route, to: destination) else { return }
+        guard let box = boundingBox(for: .singleRoute, to: destination) else { return }
         updateCameraPosition(in: box)
     }
     
@@ -119,9 +180,9 @@ final class MapViewModel: ObservableObject {
                                maxLat: latitudes.max() ?? 0,
                                minLon: longitudes.min() ?? 0,
                                maxLon: longitudes.max() ?? 0)
-        case .route:
+        case .singleRoute:
             guard let userCoordinate = userLocation?.coordinate,
-            let destination else { return nil }
+                  let destination else { return nil }
             return BoundingBox(minLat: min(userCoordinate.latitude, destination.latitude),
                                maxLat: max(userCoordinate.latitude, destination.latitude),
                                minLon: min(userCoordinate.longitude, destination.longitude),

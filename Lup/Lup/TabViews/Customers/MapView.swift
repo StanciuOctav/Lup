@@ -28,16 +28,25 @@ struct MapView: View {
                                 .shadow(radius: 5)
                                 .contextMenu {
                                     Button("Navigate to \(annotation.customerName)", systemImage: "arrow.turn.right.up") {
-                                        viewModel.getDirections(to: annotation)
+                                        if viewModel.selectedRouteOption == .one {
+                                            viewModel.getDirections(to: annotation)
+                                        }
                                     }
                                 }
                         }
                     }
                     UserAnnotation()
                     
-                    if let route = viewModel.route {
+                    if let route = viewModel.singleRoute {
                         MapPolyline(route)
                             .stroke(Color.blue, lineWidth: 3)
+                    }
+                    
+                    if !viewModel.routes.isEmpty {
+                        ForEach(viewModel.routes) { route in
+                            MapPolyline(route.route)
+                                .stroke(Color.blue, lineWidth: 3)
+                        }
                     }
                 }
                 .mapControls {
@@ -49,7 +58,7 @@ struct MapView: View {
                     VStack {
                         Spacer()
                         Button {
-                            viewModel.resetRoute()
+                            viewModel.resetAllRoutes()
                         } label: {
                             Image(systemName: "trash")
                                 .resizable()
@@ -64,12 +73,22 @@ struct MapView: View {
                 }
             }
         }
-//        .toolbar {
-//            ToolbarItem(placement: .topBarTrailing) {
-//                Menu {
-//                    
-//                }
-//            }
-//        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu("Route selection") {
+                    ForEach(RouteOptions.allCases, id: \.self) { option in
+                        Button {
+                            viewModel.selectedRouteOption = option
+                            viewModel.updateRoutesSelection()
+                        } label: {
+                            Text("\(option.rawValue.capitalized)")
+                            if viewModel.selectedRouteOption == option {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

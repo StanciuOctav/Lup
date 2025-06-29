@@ -1,0 +1,55 @@
+//
+//  RootView.swift
+//  Lup
+//
+//  Created by Octav Stanciu on 27.06.2025.
+//
+
+import Constants
+import SwiftUI
+
+enum TabSelection: Int {
+    case customers
+    case orders
+}
+
+struct RootView: View {
+    @StateObject private var viewModel = RootViewModel(customerService: CustomerNetworkService(service: DefaultNetworkService(),
+                                                                                               url: URL(string: "\(Constants.Network.mockURL)\(Constants.Network.getCustomersEndpoint)")!),
+                                                       orderService: OrderNetworkService(service: DefaultNetworkService(),
+                                                                                         url: URL(string: "\(Constants.Network.mockURL)\(Constants.Network.getOrdersEndpoint)")!))
+    @StateObject private var locationService = LocationService()
+    @StateObject private var notificationService = NotificationService()
+    @StateObject private var navigationManager = NavigationManager()
+    
+    @State private var selectedTab: TabSelection = .orders
+    
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            OrdersView(ordersSubject: viewModel.ordersSubject,
+                      notificationService: notificationService,
+                      navigationManager: navigationManager)
+                .tabItem {
+                    Label(LocalizedStringKey("Orders"), systemImage: "shippingbox.fill")
+                }
+                .tag(TabSelection.orders)
+            
+            CustomersView(customersSubject: viewModel.customersSubject,
+                         locationService: locationService)
+                .tabItem {
+                    Label(LocalizedStringKey("Customers"), systemImage: "figure.2.arms.open")
+                }
+                .tag(TabSelection.customers)
+        }
+        .onAppear {
+            viewModel.fetchData()
+            Analytics.setShared(with: FirebaseAnalyticsService())
+        }
+        .onOpenURL { url in
+            navigationManager.handleURL(url)
+        }
+        .onChange(of: navigationManager.currentRoute) { _, route in
+            selectedTab = route.tab
+        }
+    }
+}
